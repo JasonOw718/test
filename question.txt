@@ -1,0 +1,83 @@
+Here is the text with all the numbers removed:
+What is u-Pustaka?
+What kind of collaboration does u-Pustaka involve?
+How does u-Pustaka benefit users?
+Who can access u-Pustaka?
+Is u-Pustaka free to use?
+How can users access u-Pustaka's resources?
+How does u-Pustaka ensure the quality of its resources?
+Can users provide feedback or report issues with u-Pustaka?
+What are the future plans for u-Pustaka?
+What organizations are involved in the u-Pustaka collaboration?
+What is the Vission of u-Pustaka?
+What is the Mission of u-Pustaka?
+What is the Motto of u-Pustaka?
+What is the rationale behind the u-Pustaka logo?
+What is the mailing address for u-Pustaka Consortium?
+What are the telephone contact details for u-Pustaka Consortium?
+What is the fax number for u-Pustaka Consortium?
+What is the email address for u-Pustaka Consortium?
+How can I send in an enquiry to u-Pustaka Consortium?
+How many groups of membership are there in the u-Pustaka Portal?
+What is the difference between u-Pustaka members and On-line Members?
+How much is the membership fee?
+How do I sign up?
+Who is the Consortium Libraries?
+What documents are required for Malaysians to become u-Members through the u-Pustaka Portal or at any u-Pustaka Consortium counter stations?
+What are the different categories of membership offered by u-Pustaka and their respective age ranges?
+What facilities are available to u-Members?
+How can individuals become online members of u-Pustaka?
+In what situations is a change of u-Member status applicable?
+What services are available for visitors at u-Pustaka?
+What is the u-Pustaka Portal?
+What does the u-Pustaka Portal offer to its members?
+What are the components of the Web Publishing section of the u-Pustaka Portal?
+What kind of content is available in the Content Management section of the u-Pustaka Portal?
+What is the purpose of e-Reviews in the u-Pustaka Portal?
+What is the Dashboard feature in the u-Pustaka Portal?
+What are included in the e-Resources offered by the u-Pustaka Portal?
+What is the purpose of Audio-books in the u-Pustaka Portal?
+What features are included in the Collaboration Components of the u-Pustaka Portal?
+What is Ask u-Pustaka?
+What is the purpose of Chat with Your Expert in the u-Pustaka Portal?
+What is the purpose of the Discussion Forum in the u-Pustaka Portal?
+What is the u-Pustaka Inter-lending Service?
+What search functionalities are available on the u-Pustaka Portal?
+What features are available for the borrowing scenario on the u-Pustaka Portal?
+How can members return borrowed items through the u-Pustaka Portal?
+How does the renewal process work on the u-Pustaka Portal?
+What role do RFID-enabled equipment play in the borrowing process?
+What is Citizens' VOICE and how can one participate?
+What are the photo guidelines for Citizens' VOICE submissions?
+What are the terms and conditions for submitting a photograph to Citizens' VOICE?
+What are the components of the Web Publishing section on the u-Pustaka Portal?
+What does the News module include?
+What is included in the Event Highlights module?
+What is the purpose of the RSS Feed module?
+What is the purpose of the Links module?
+What are the components of the Content Management section on the u-Pustaka Portal?
+What is included in the Electronic reviews module?
+What is the purpose of the Dashboard module?
+What are the components of the Service section on the u-Pustaka Portal?
+What functionalities does the u-Pustaka User Registration module offer?
+What is the purpose of the One Search module?
+How does the Booking Management module work?
+What functionalities does the Loan Management module offer?
+How does the Delivery Channel module function?
+What features are included in the Returns Management module?
+What functionalities does the Renewal module offer?
+How does the Reservation Management module work?
+What functionalities are provided by the Fines Management module?
+What information does the Transaction Reports module contain?
+What is SMS-IOD and how does it work?
+What are the components of the Collaboration section on the u-Pustaka Portal?
+What functionalities does the Ask u-Pustaka module offer?
+How does the Chat with Your Expert module work?
+What is the purpose of the Discussion Forum module?
+What functionalities are available under the "Edit Profile" menu?
+What is the purpose of the "My Basket" menu?
+What information does the "My Booking List" menu contain?
+What functionalities are available under the "My Reservations (Waiting List)" menu?
+What information does the "My Inter-lending Transactions" menu display?
+What is included in the "My Return Request List" menu?
+What information is available under the "My Bills" menu?

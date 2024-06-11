@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Bot</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .chatbot-icon {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        background-color: #adc3c0;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        font-size: 24px;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+      }
+      .chatbot-icon:hover {
+        transform: scale(1.1);
+      }
+      .chat-container {
+        position: fixed;
+        bottom: 90px;
+        right: 20px;
+        max-width: 500px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        display: none;
+      }
+      .chat-header {
+        padding: 10px;
+        background-color: #adc3c0;
+        color: #fff;
+        font-size: 18px;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .chat-box {
+        height: 300px;
+        overflow-y: auto;
+        padding: 10px;
+        background-color: #f3f4f6;
+      }
+      .language-buttons {
+        display: flex;
+        align-items: center;
+      }
+
+      .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #adc3c0;
+        padding: 10px 20px;
+      }
+
+      .header-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #fff;
+      }
+      .language-buttons button {
+        margin: 0 5px;
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #adc3c0;
+        color: #fff;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .language-buttons button:hover {
+        background-color: #fff;
+        color: #000;
+      }
+
+      .question-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 10px;
+      }
+      .question-buttons button {
+        flex: 1;
+        padding: 10px;
+        border: 2px solid #adc3c0;
+        border-radius: 25px;
+        background-color: #fff;
+        color: #adc3c0;
+        font-size: 16px;
+        text-align: center;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background-color 0.3s, color 0.3s;
+      }
+      .message {
+        margin-bottom: 10px;
+        padding: 10px 15px;
+        border-radius: 8px;
+      }
+      .user-message {
+        background-color: #adc3c0;
+        color: #fff;
+        text-align: right;
+      }
+      .bot-message {
+        background-color: #f0f0f0;
+        color: #333;
+        text-align: left;
+      }
+      .input-container {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        background-color: #fff;
+        border-top: 1px solid #ccc;
+      }
+      .input-box {
+        flex: 1;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+      .send-button {
+        padding: 5px 10px;
+        margin-left: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #b2c8bb;
+        color: #fff;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      .record-button {
+        padding: 5px 10px;
+        margin-left: 10px;
+        border: none;
+        border-radius: 5px;
+        color: #fff;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      #recording-text {
+        font-size: 18px;
+        color: #333;
+        margin-top: 20px;
+        animation: listeningAnimation 2s infinite alternate;
+      }
+
+      @keyframes listeningAnimation {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chatbot-icon" id="chatbot-icon">🤖</div>
+
+    <div class="chat-container" id="chat-container">
+      <div class="chat-header">Chat Bot</div>
+      <div class="header-container">
+        <div class="header-title">Select Your Language</div>
+        <div class="language-buttons">
+          <button id="bm-button">BM</button>
+          <button id="cn-button">CN</button>
+          <button id="eng-button">ENG</button>
+        </div>
+      </div>
+      <div class="chat-box" id="chat-box"></div>
+      <div class="question-buttons" id="question-buttons"></div>
+      <div class="input-container">
+        <input
+          type="text"
+          class="input-box"
+          id="input-box"
+          placeholder="Ask me anything..."
+        />
+        <p id="recording-text"></p>
+        <button class="record-button" id="record-button">🎙️</button>
+        <button class="send-button" id="send-button">➢</button>
+      </div>
+    </div>
+
+    <script>
+      var chatbotIcon = document.getElementById("chatbot-icon");
+      var chatContainer = document.getElementById("chat-container");
+      var chatBox = document.getElementById("chat-box");
+      var inputBox = document.getElementById("input-box");
+      var sendButton = document.getElementById("send-button");
+      var recordButton = document.getElementById("record-button");
+      var recordDisplay = document.getElementById("recording-text");
+
+      var bmButton = document.getElementById("bm-button");
+      var cnButton = document.getElementById("cn-button");
+      var engButton = document.getElementById("eng-button");
+
+      var questionButtons = document.getElementById("question-buttons");
+      let url = "";
+      var currentUserMessage = "";
+
+      var language = "eng";
+      var defaultMessages = {
+        bm: "Saya adalah pembantu maya E-Pustaka, bagaimana saya boleh membantu anda?",
+        cn: "我是E-Pustaka虚拟助手,我可以帮您做些什么？",
+        eng: "I am the E-Pustaka virtual assistant, how can I assist you?",
+      };
+
+      var questions = [];
+      var questionButtonRefs = [];
+
+      function handleKeyPress(event) {
+        if (event.key === "Enter") {
+          sendButton.click(); // Trigger the send button click event
+        }
+      }
+
+      chatbotIcon.addEventListener("click", function () {
+        if (chatContainer.style.display === "block") {
+          chatContainer.style.display = "none";
+        } else {
+          chatContainer.style.display = "block";
+          displayDefaultMessage();
+        }
+        engButton.style.backgroundColor = "#f4cccc";
+        bmButton.style.backgroundColor = "";
+        cnButton.style.backgroundColor = "";
+      });
+
+      bmButton.addEventListener("click", function () {
+        if (language !== "bm") {
+          language = "bm";
+          displayDefaultMessage();
+          bmButton.style.backgroundColor = "#f4cccc";
+          cnButton.style.backgroundColor = "";
+          engButton.style.backgroundColor = "";
+          removeQuestionButtons();
+        }
+      });
+
+      cnButton.addEventListener("click", function () {
+        if (language !== "cn") {
+          language = "cn";
+          displayDefaultMessage();
+          cnButton.style.backgroundColor = "#f4cccc";
+          bmButton.style.backgroundColor = "";
+          engButton.style.backgroundColor = "";
+          removeQuestionButtons();
+        }
+      });
+
+      engButton.addEventListener("click", function () {
+        if (language !== "eng") {
+          language = "eng";
+          displayDefaultMessage();
+          engButton.style.backgroundColor = "#f4cccc";
+          bmButton.style.backgroundColor = "";
+          cnButton.style.backgroundColor = "";
+          removeQuestionButtons();
+        }
+      });
+
+      sendButton.addEventListener("click", function () {
+        var userMessage = inputBox.value.trim();
+        if (userMessage !== "") {
+          currentUserMessage = userMessage;
+          sendMessage(userMessage);
+          inputBox.value = "";
+          setTimeout(sendBotMessage, 200);
+          removeQuestionButtons();
+        }
+      });
+
+      recordButton.addEventListener("click", async function () {
+        inputBox.style.display = "none";
+        sendButton.style.display = "none";
+        recordButton.style.display = "none";
+        recordDisplay.textContent = "Listening...";
+
+        fetch("/record", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ language: language }),
+        })
+          .then((response) => response.text())
+          .then((data) => {
+            inputBox.style.display = "block";
+            sendButton.style.display = "block";
+            recordButton.style.display = "block";
+            recordDisplay.textContent = "";
+            document.getElementById("input-box").value = data;
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      });
+
+      
+      // Add an event listener to the input box to listen for key press events
+      inputBox.addEventListener("keypress", handleKeyPress);
+
+      function displayDefaultMessage() {
+        chatBox.innerHTML = "";
+        //  Clear existing messages
+        var defaultMessage = defaultMessages[language];
+        var messageElement = document.createElement("div");
+        messageElement.classList.add("message", "bot-message");
+        messageElement.textContent = defaultMessage;
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      function displayQuestions() {
+        questionButtons.innerHTML = ""; // Clear existing buttons
+        questions.forEach((question, index) => {
+          var questionButton = document.createElement("button");
+          questionButton.textContent = question;
+          questionButton.classList.add("question-buttons");
+          questionButton.addEventListener("click", function () {
+            currentUserMessage = question;
+            sendMessage(question);
+            removeQuestionButtons();
+          });
+          questionButtons.appendChild(questionButton);
+          questionButtonRefs.push(questionButton);
+        });
+      }
+
+      function removeQuestionButtons() {
+        // Iterate through the stored references and remove each button
+        questionButtonRefs.forEach((button) => {
+          button.remove();
+        });
+      }
+
+      function sendMessage(message) {
+        var messageElement = document.createElement("div");
+        messageElement.classList.add("message", "user-message");
+        messageElement.textContent = message;
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        console.log("Sending user message to backend:", message);
+        fetch("/process_user_message", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ string: message, language: language }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.image_data) {
+              displayImage(data.image_data);
+            }
+            sendBotMessage(data.message);
+          });
+
+        url = `/get_questions?user_msg=${encodeURIComponent(
+          message
+        )}&language=${encodeURIComponent(language)}`;
+      }
+
+      function sendBotMessage(botMessage) {
+        var messageElement = document.createElement("div");
+        messageElement.classList.add("message", "bot-message");
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        var index = 0;
+        function addNextLetter() {
+          if (index < botMessage.length) {
+            var textNode = document.createTextNode(botMessage[index]);
+            messageElement.appendChild(textNode);
+            index++;
+            chatBox.scrollTop = chatBox.scrollHeight;
+            setTimeout(addNextLetter, 10); // Adjust the delay here (e.g., 50 milliseconds)
+          } else {
+            fetchQuestions();
+          }
+        }
+        addNextLetter();
+      }
+
+      function fetchQuestions() {
+        fetch(url)
+          .then((response) => response.json())
+          .then((data) => {
+            questions = data;
+            displayQuestions();
+          })
+          .catch((error) => {
+            console.error("Error fetching questions:", error);
+          });
+      }
+
+      function displayImage(imageData) {
+        var imgElement = document.createElement("img");
+        imgElement.src = "data:image/jpeg;base64," + imageData;
+        imgElement.style.maxWidth = "100%";
+        imgElement.style.borderRadius = "10px";
+        var messageElement = document.createElement("div");
+        messageElement.classList.add("message", "bot-message");
+        messageElement.appendChild(imgElement);
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    </script>
+  </body>
+</html>
