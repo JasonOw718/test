@@ -314,3 +314,7 @@ tokenizer1 = CLIPTokenizerFast.from_pretrained(MODEL_ID)
 image_arr = embed_image()
 r = sr.Recognizer()
 
+if __name__ == '__main__':
+   port = int(os.environ.get('PORT', 5000))  # Use PORT environment variable if set, otherwise default to 5000
+   app.run(host='0.0.0.0', port=port)
+
