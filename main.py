@@ -78,8 +78,7 @@ def csv_to_dict(file, encoding='utf-8'):
 
                 en_dict[key] = value
     except FileNotFoundError:
-
-        print("File does not exist")
+        return en_dict
 
     return en_dict
 
@@ -153,7 +152,6 @@ def embed_text(user_msg):
 def should_retrieve_map(user_msg):
     text_emb = embed_text(user_msg)
     scores = np.dot(text_emb, image_arr.T)
-    print(f"scores: {scores}")
     if scores > 3.1:
         image_path = "image/National_Library_Map.jpg"
         with open(image_path, "rb") as img_file:
@@ -172,17 +170,14 @@ def process_user_message():
 
     if language != "eng":
         user_msg = translate_to_en(user_msg, model_list, language)
-        print(f"Other languages user message: {user_msg}")
     try:
         res = qa.invoke({"query": user_msg})
         bot_response = res['result']
     except IndexError:
         bot_response = "I dont know.Maybe you can try to ask it differently. "
         
-    print(bot_response)
     if language != 'eng':
         bot_response = translate_to_others(bot_response, model_list, language)
-        print(f"Other languages bot response: {bot_response}")
 
     data = should_retrieve_map(user_msg)
     if not isinstance(data, str):
@@ -275,7 +270,6 @@ def find_guided_qa():
 def record_text():
     data = request.get_json()
     language = data.get('language')
-    print(language)
     MyText = ''
     try:
         with sr.Microphone() as source2:
@@ -290,9 +284,9 @@ def record_text():
                 
             return MyText
     except sr.RequestError as e:
-        print("Could not request results: {0}".format(e))
+        return "Could not request results: {0}".format(e)
     except sr.UnknownValueError:
-        print("Unknown error occurred")
+        return "Unknown error occurred"
 
 
 if __name__ == '__main__':
@@ -320,4 +314,4 @@ if __name__ == '__main__':
     tokenizer1 = CLIPTokenizerFast.from_pretrained(MODEL_ID)
     image_arr = embed_image()
     r = sr.Recognizer()
-    app.run(debug=True)
+    app.run(debug=False,host="0.0.0.0")
