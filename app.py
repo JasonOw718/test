@@ -315,6 +315,6 @@ image_arr = embed_image()
 r = sr.Recognizer()
 
 if __name__ == '__main__':
-   port = int(os.environ.get('PORT', 5000))  # Use PORT environment variable if set, otherwise default to 5000
+   port = int(os.environ.get('PORT', 8080))
    app.run(host='0.0.0.0', port=port)
 
