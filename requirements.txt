@@ -2,6 +2,7 @@ flask
 python-dotenv
 langchain
 langchain_community
+langchain-google-genai
 transformers
 torch
 sentence-transformers
