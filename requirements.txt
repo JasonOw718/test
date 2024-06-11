@@ -4,6 +4,7 @@ langchain
 langchain_community
 langchain-google-genai
 transformers
+sentencepiece
 torch
 sentence-transformers
 Pillow
