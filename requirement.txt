@@ -1,0 +1,12 @@
+flask
+python-dotenv
+langchain
+langchain_community
+transformers
+torch
+sentence-transformers
+Pillow
+numpy
+faiss-cpu
+speechrecognition
+Gunicorn
