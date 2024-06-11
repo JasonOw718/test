@@ -289,29 +289,26 @@ def record_text():
         return "Unknown error occurred"
 
 
-if __name__ == '__main__':
-    
-    data_dict = csv_to_dict("en-FAQ.csv")
-    model_list = load_modal()
-    vectorstore = process_doc(model_list[0])
-    new_vectorstore = FAISS.load_local("faiss_index_react",
-                                       model_list[0],
-                                       allow_dangerous_deserialization=True)
-    retriever = new_vectorstore.as_retriever(
-        search_type="similarity_score_threshold",
-        search_kwargs={
-            "score_threshold": 0.6,
-            "k": 5
-        })
-    qa = RetrievalQA.from_chain_type(llm=GoogleGenerativeAI(
-        model="models/text-bison-001", temperature=0),
-                                     chain_type_kwargs={"prompt": prompt},
-                                     retriever=retriever)
+data_dict = csv_to_dict("en-FAQ.csv")
+model_list = load_modal()
+vectorstore = process_doc(model_list[0])
+new_vectorstore = FAISS.load_local("faiss_index_react",
+                                    model_list[0],
+                                    allow_dangerous_deserialization=True)
+retriever = new_vectorstore.as_retriever(
+    search_type="similarity_score_threshold",
+    search_kwargs={
+        "score_threshold": 0.6,
+        "k": 5
+    })
+qa = RetrievalQA.from_chain_type(llm=GoogleGenerativeAI(
+    model="models/text-bison-001", temperature=0),
+                                    chain_type_kwargs={"prompt": prompt},
+                                    retriever=retriever)
 
-    device = "cuda" if torch.cuda.is_available() else (
-        "mps" if torch.backends.mps.is_available() else "cpu")
-    Clp_model = CLIPModel.from_pretrained(MODEL_ID).to(device)
-    tokenizer1 = CLIPTokenizerFast.from_pretrained(MODEL_ID)
-    image_arr = embed_image()
-    r = sr.Recognizer()
-    app.run(debug=False,host="0.0.0.0")
+device = "cuda" if torch.cuda.is_available() else (
+    "mps" if torch.backends.mps.is_available() else "cpu")
+Clp_model = CLIPModel.from_pretrained(MODEL_ID).to(device)
+tokenizer1 = CLIPTokenizerFast.from_pretrained(MODEL_ID)
+image_arr = embed_image()
+r = sr.Recognizer()
