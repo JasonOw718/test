@@ -20,18 +20,11 @@ import speech_recognition as sr
 
 prompt_template = """
 As a responsible and super loyal e-library assistant highly focused on u-Pustaka, the best e-library in Malaysia, I will use the following information to answer your question:
-
 **Context:**
-
-
 {context}
-
 **Question:**
-
 {question}
-
 **Answer Guidelines:**
-
 * I will base my answer solely on the facts provided in the document. 
 * If the document doesn't contain the answer, I will honestly say "I don't know" instead of making something up.
 * My response will adhere to u-Pustaka's high standards and avoid:
@@ -41,9 +34,7 @@ As a responsible and super loyal e-library assistant highly focused on u-Pustaka
     * Referencing or comparing u-Pustaka to competitors
     * Referencing other irrelevent or private sources
     
-
 **Answer:**
-
 """
 
 prompt = PromptTemplate(template=prompt_template,
@@ -79,7 +70,8 @@ def csv_to_dict(file, encoding='utf-8'):
 
                 en_dict[key] = value
     except FileNotFoundError:
-        return en_dict
+
+        print("File does not exist")
 
     return en_dict
 
@@ -153,6 +145,7 @@ def embed_text(user_msg):
 def should_retrieve_map(user_msg):
     text_emb = embed_text(user_msg)
     scores = np.dot(text_emb, image_arr.T)
+    print(f"scores: {scores}")
     if scores > 3.1:
         image_path = "image/National_Library_Map.jpg"
         with open(image_path, "rb") as img_file:
@@ -171,20 +164,23 @@ def process_user_message():
 
     if language != "eng":
         user_msg = translate_to_en(user_msg, model_list, language)
+        print(f"Other languages user message: {user_msg}")
     try:
         res = qa.invoke({"query": user_msg})
         bot_response = res['result']
     except IndexError:
         bot_response = "I dont know.Maybe you can try to ask it differently. "
-        
+
+    print(bot_response)
     if language != 'eng':
         bot_response = translate_to_others(bot_response, model_list, language)
+        print(f"Other languages bot response: {bot_response}")
 
     data = should_retrieve_map(user_msg)
     if not isinstance(data, str):
         return jsonify(message=bot_response)
     return jsonify(message=bot_response, image_data=should_retrieve_map(user_msg))
-    
+
 
 
 def translate_to_others(msg, model_list, language):
@@ -195,7 +191,7 @@ def translate_to_others(msg, model_list, language):
 
     if language == "bm":
         chunks = [msg[i:i + max_chunk_length] for i in range(0, len(msg), max_chunk_length)]
-        
+
         for chunk in chunks:
             input_ids = tokenizer.encode(f'terjemah ke Melayu: {chunk}', return_tensors='pt')
             outputs = model.generate(input_ids, max_length=max_chunk_length)
@@ -203,11 +199,11 @@ def translate_to_others(msg, model_list, language):
             outputs = [i for i in outputs[0] if i not in all_special_ids]
             translated_chunk = tokenizer.decode(outputs, spaces_between_special_tokens=False)
             translated_chunks.append(translated_chunk)
-    
+
     elif language == "cn":
         translation = pipeline("translation_en_to_zh", model=model_list[4], tokenizer=model_list[3])
         chunks = [msg[i:i + max_chunk_length] for i in range(0, len(msg), max_chunk_length)]
-        
+
         for chunk in chunks:
             translated_chunk = translation(chunk, max_length=max_chunk_length)[0]['translation_text']
             translated_chunks.append(translated_chunk)
@@ -271,6 +267,7 @@ def find_guided_qa():
 def record_text():
     data = request.get_json()
     language = data.get('language')
+    print(language)
     MyText = ''
     try:
         with sr.Microphone() as source2:
@@ -282,39 +279,37 @@ def record_text():
                 MyText = r.recognize_google(audio2, language='cmn-Hans-CN')
             else:
                 MyText = r.recognize_google(audio2)
-                
+
             return MyText
     except sr.RequestError as e:
-        return "Could not request results: {0}".format(e)
+        print("Could not request results: {0}".format(e))
     except sr.UnknownValueError:
-        return "Unknown error occurred"
+        print("Unknown error occurred")
 
-
-data_dict = csv_to_dict("en-FAQ.csv")
-model_list = load_modal()
-vectorstore = process_doc(model_list[0])
-new_vectorstore = FAISS.load_local("faiss_index_react",
-                           model_list[0],
-                           allow_dangerous_deserialization=True)
-retriever = new_vectorstore.as_retriever(
-search_type="similarity_score_threshold",
-search_kwargs={
-"score_threshold": 0.6,
-"k": 5
-})
-qa = RetrievalQA.from_chain_type(llm=GoogleGenerativeAI(
-model="models/text-bison-001", temperature=0),
-                         chain_type_kwargs={"prompt": prompt},
-                         retriever=retriever)
-
-device = "cuda" if torch.cuda.is_available() else (
-"mps" if torch.backends.mps.is_available() else "cpu")
-Clp_model = CLIPModel.from_pretrained(MODEL_ID).to(device)
-tokenizer1 = CLIPTokenizerFast.from_pretrained(MODEL_ID)
-image_arr = embed_image()
-r = sr.Recognizer()
 
 if __name__ == '__main__':
-   port = int(os.environ.get('PORT', 8080))
-   app.run(host='0.0.0.0', port=port)
 
+    data_dict = csv_to_dict("en-FAQ.csv")
+    model_list = load_modal()
+    vectorstore = process_doc(model_list[0])
+    new_vectorstore = FAISS.load_local("faiss_index_react",
+                                       model_list[0],
+                                       allow_dangerous_deserialization=True)
+    retriever = new_vectorstore.as_retriever(
+        search_type="similarity_score_threshold",
+        search_kwargs={
+            "score_threshold": 0.6,
+            "k": 5
+        })
+    qa = RetrievalQA.from_chain_type(llm=GoogleGenerativeAI(
+        model="models/text-bison-001", temperature=0),
+                                     chain_type_kwargs={"prompt": prompt},
+                                     retriever=retriever)
+
+    device = "cuda" if torch.cuda.is_available() else (
+        "mps" if torch.backends.mps.is_available() else "cpu")
+    Clp_model = CLIPModel.from_pretrained(MODEL_ID).to(device)
+    tokenizer1 = CLIPTokenizerFast.from_pretrained(MODEL_ID)
+    image_arr = embed_image()
+    r = sr.Recognizer()
+    app.run(debug=True)
