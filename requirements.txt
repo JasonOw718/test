@@ -11,4 +11,5 @@ Pillow
 numpy
 faiss-cpu
 speechrecognition
+pyaudio
 Gunicorn
