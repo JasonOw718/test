@@ -50,33 +50,24 @@ load_dotenv()
 app = Flask(__name__)
 
 
+
+
+model_list = None
+vectorstore = None
+retriever = None
+qa = None
+device = None
+Clp_model = None
+tokenizer1 = None
+image_arr = None
+r = sr.Recognizer()
+
 @app.route('/')
 def home():
     return render_template("main.html")
 
-
-def csv_to_dict(file, encoding='utf-8'):
-    en_dict = {}
-
-    try:
-        with open(file, encoding=encoding) as enFAQ:
-
-            reader = csv.DictReader(enFAQ)
-
-            for row in reader:
-
-                key = row['Question']
-                value = row['Answer']
-
-                en_dict[key] = value
-    except FileNotFoundError:
-
-        print("File does not exist")
-
-    return en_dict
-
-
-def load_modal():
+def intialize():
+    global model_list, vectorstore, retriever, qa, device, Clp_model, tokenizer1, image_arr
 
     ms_tokenizer = AutoTokenizer.from_pretrained(
         'mesolitica/translation-t5-small-standard-bahasa-cased-v2',
@@ -95,13 +86,10 @@ def load_modal():
         model_kwargs=model_kwargs,
         encode_kwargs=encode_kwargs)
 
-    return [
+    model_list = [
         embeddings_model, ms_tokenizer, ms_model, zh_tokenizer, zh_model,
         zh_tokenizer1, zh_model1
     ]
-
-
-def process_doc(embeddings):
 
     loader = CSVLoader(file_path="en-FAQ.csv")
     documents = loader.load()
@@ -110,14 +98,28 @@ def process_doc(embeddings):
                                           separator="\n")
     docs = text_splitter.split_documents(documents=documents)
 
-    vectorstore = FAISS.from_documents(docs, embeddings)
+    vectorstore = FAISS.from_documents(docs, embeddings_model)
     vectorstore.save_local("faiss_index_react")
 
-    with open("question.txt", "r") as file:
-        lines = file.readlines()
-        lines = [line.strip() for line in lines]
+    new_vectorstore = FAISS.load_local("faiss_index_react",
+                                       embeddings_model,
+                                       allow_dangerous_deserialization=True)
+    retriever = new_vectorstore.as_retriever(
+        search_type="similarity_score_threshold",
+        search_kwargs={
+            "score_threshold": 0.6,
+            "k": 5
+        })
+    qa = RetrievalQA.from_chain_type(llm=GoogleGenerativeAI(
+        model="models/text-bison-001", temperature=0),
+                                     chain_type_kwargs={"prompt": prompt},
+                                     retriever=retriever)
 
-    return vectorstore
+    device = "cuda" if torch.cuda.is_available() else (
+        "mps" if torch.backends.mps.is_available() else "cpu")
+    Clp_model = CLIPModel.from_pretrained(MODEL_ID).to(device)
+    tokenizer1 = CLIPTokenizerFast.from_pretrained(MODEL_ID)
+    image_arr = embed_image()
 
 
 def embed_image():
@@ -270,15 +272,15 @@ def record_text():
     print(language)
     MyText = ''
     try:
-        with sr.Microphone() as source2:
-            r.adjust_for_ambient_noise(source2, duration=0.2)
-            audio2 = r.listen(source2, phrase_time_limit=12.0)
+        with sr.Microphone() as source:
+            r.adjust_for_ambient_noise(source, duration=0.2)
+            audio = r.listen(source, phrase_time_limit=12.0)
             if language == "bm":
-                MyText = r.recognize_google(audio2, language='ms-MY')
+                MyText = r.recognize_google(audio, language='ms-MY')
             elif language == "cn":
-                MyText = r.recognize_google(audio2, language='cmn-Hans-CN')
+                MyText = r.recognize_google(audio, language='cmn-Hans-CN')
             else:
-                MyText = r.recognize_google(audio2)
+                MyText = r.recognize_google(audio)
 
             return MyText
     except sr.RequestError as e:
@@ -287,29 +289,7 @@ def record_text():
         print("Unknown error occurred")
 
 
+
 if __name__ == '__main__':
-
-    data_dict = csv_to_dict("en-FAQ.csv")
-    model_list = load_modal()
-    vectorstore = process_doc(model_list[0])
-    new_vectorstore = FAISS.load_local("faiss_index_react",
-                                       model_list[0],
-                                       allow_dangerous_deserialization=True)
-    retriever = new_vectorstore.as_retriever(
-        search_type="similarity_score_threshold",
-        search_kwargs={
-            "score_threshold": 0.6,
-            "k": 5
-        })
-    qa = RetrievalQA.from_chain_type(llm=GoogleGenerativeAI(
-        model="models/text-bison-001", temperature=0),
-                                     chain_type_kwargs={"prompt": prompt},
-                                     retriever=retriever)
-
-    device = "cuda" if torch.cuda.is_available() else (
-        "mps" if torch.backends.mps.is_available() else "cpu")
-    Clp_model = CLIPModel.from_pretrained(MODEL_ID).to(device)
-    tokenizer1 = CLIPTokenizerFast.from_pretrained(MODEL_ID)
-    image_arr = embed_image()
-    r = sr.Recognizer()
+    intialize()
     app.run(debug=True)
