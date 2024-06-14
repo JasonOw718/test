@@ -293,11 +293,13 @@
       });
 
       recordButton.addEventListener("click", async function () {
-        inputBox.style.display = "none";
-        sendButton.style.display = "none";
-        recordButton.style.display = "none";
-        recordDisplay.textContent = "Listening...";
-
+        navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function(stream) {
+            inputBox.style.display = "none";
+            sendButton.style.display = "none";
+            recordButton.style.display = "none";
+            recordDisplay.textContent = "Listening...";
+        })
         fetch("/record", {
           method: "POST",
           headers: {
